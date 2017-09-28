@@ -1,3 +1,12 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+.idea
+.ipynb_checkpoints
+
+# R studio files
 .Rproj.user
 .Rhistory
 .RData
