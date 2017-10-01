@@ -46,13 +46,14 @@ rare_title <- c('Dona', 'Lady', 'the Countess','Capt', 'Col', 'Don',
                 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer')
 
 # Also reassign mlle, ms, and mme accordingly
-full$Title[full$Title == 'Mlle']        <- 'Miss' 
-full$Title[full$Title == 'Ms']          <- 'Miss'
-full$Title[full$Title == 'Mme']         <- 'Mrs' 
-full$Title[full$Title %in% rare_title]  <- 'Rare Title'
+full$newTitle = full$Title
+full$newTitle[full$newTitle == 'Mlle']        <- 'Miss' 
+full$newTitle[full$newTitle == 'Ms']          <- 'Miss'
+full$newTitle[full$newTitle == 'Mme']         <- 'Mrs' 
+full$newTitle[full$newTitle %in% rare_title]  <- 'Rare Title'
 
 # Show title counts by sex again
-table(full$Sex, full$Title)
+table(full$Sex, full$newTitle)
 ```
 
 ```{r}
