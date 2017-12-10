@@ -12,12 +12,12 @@ Script expects all 6 datasets (*credits.csv *, *keywords.csv*, *links.csv*, *lin
 
 ## Setting path to movies datasets.
 
-```python
+```
 python csv_importer.py --path /home/ayla/movies
 ```
 
 ## Usage
 
-```python
+```
 python csv_importer.py --help
 ```
