@@ -7,7 +7,7 @@ Default is running in current directory.
 Imports [Kaggle movies dataset](https://www.kaggle.com/rounakbanik/the-movies-dataset),
 converts to Pandas dataframes with cleanup and exports as pickle files.
 
-Script expects all 6 datasets (*credits.csv *, *keywords.csv*, *links.csv*, *links_small.csv*, *movies_metadata.csv*, *ratings_small.csv*).
+Script expects all 6 datasets (*credits.csv*, *keywords.csv*, *links.csv*, *links_small.csv*, *movies_metadata.csv*, *ratings_small.csv*).
 
 
 ## Setting path to movies datasets.
