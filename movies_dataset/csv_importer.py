@@ -8,50 +8,51 @@ from typing import Dict, List, Union
 
 
 def convert_to_dict_list(string: str) -> Union[List[Dict], None]:
-    if len(string) < 1:
+    """
+    Use Python's Active Syntax Tree (ast) to convert strings to a list of dict objects.
+    This is an easy way to deal with the lists and the single-quoted dicts, which the JSON converter won't handle.
+    """
+    # initial sanity check for malformed input: need minimum 2 characters to form valid dict object
+    if len(string) <= 1:
         return None
 
-    converted_value = ast.literal_eval(string)
-    if type(converted_value) is list:
-        return converted_value
-    else:
+    try:
+        converted_value = ast.literal_eval(string)
+        if type(converted_value) is list:
+            return converted_value
+        else:
+            return None
+    except ValueError:
         return None
 
 
 def convert_to_dict(string: str) -> Union[Dict, None]:
-    if len(string) < 1:
+    """
+    Use Python's Active Syntax Tree (ast) to convert strings to dict objects.
+    This is an easy way to deal with the single-quoted dicts, which the JSON converter won't handle.
+    """
+    # initial sanity check for malformed input: need minimum 2 characters to form valid dict object
+    if len(string) <= 1:
         return None
 
-    converted_value = ast.literal_eval(string)
-    if type(converted_value) is list and len(converted_value) == 1:
-        return converted_value[0]
-    elif type(converted_value) is dict:
-        return converted_value
-    else:
+    try:
+        converted_value = ast.literal_eval(string)
+        if type(converted_value) is list and len(converted_value) == 1:
+            return converted_value[0]
+        elif type(converted_value) is dict:
+            return converted_value
+        else:
+            return None
+    except ValueError:
         return None
 
 
-def format_imdb_id(id: str) -> str:
-    if not id.startswith('tt'):
-        return 'tt{}'.format(id)
-
-    return id
-
-
-def convert_to_bool(string: str) -> bool:
+def convert_to_bool_object(string: str) -> pd.np.object:
     try:
         converted_value = strtobool(string)
-        return bool(converted_value)
+        return pd.np.bool(converted_value)
     except:
-        # print(string)
-        return False
-
-
-def convert_to_int(string: str) -> pd.np.int32:
-    try:
-        return pd.np.int32(string)
-    except:
-        # print(string)
+        # promotes to object
         return pd.np.nan
 
 
@@ -59,23 +60,43 @@ def convert_to_float(string: str) -> pd.np.float:
     try:
         return pd.np.float(string)
     except:
-        # print(string)
         return pd.np.nan
 
 
-def format_str(string: str) -> Union[str, None]:
+def cleanup_str(string: str) -> str:
+    """Basic string cleanup. If the string matches any empty or null patterns, return empty string."""
     try:
-        if len(string) < 1:
-            return None
-        if 'NaN' in string:
-            return None
-        if string is None:
-            return None
-
+        if len(string) < 1 or 'NaN' in string or string is None:
+            return ''
         return string
     except:
-        print(string)
+        return ''
+
+
+def convert_to_date(string: str) -> Union[datetime, None]:
+    try:
+        result = datetime.strptime(string, '%Y-%m-%d')
+        return result
+    except:
         return None
+
+
+def convert_to_imdb_id(id: str) -> str:
+    """Format IMDB IDs to follow the same ID convention (starts with 'tt'."""
+    try:
+        id = cleanup_str(id)
+        if not id.startswith('tt'):
+            return 'tt{}'.format(id)
+        return id
+    except:
+        return None
+
+
+def convert_to_id(id: str) -> pd.np.int32:
+    try:
+        return pd.np.int32(id)
+    except:
+        return -1
 
 
 def main(path: str) -> None:
@@ -86,33 +107,22 @@ def main(path: str) -> None:
                              names=['cast', 'crew', 'tmdbId'],
                              converters={'cast': convert_to_dict_list,
                                          'crew': convert_to_dict_list,
-                                         'tmdbId': convert_to_int})
-    print(credits_df)
+                                         'tmdbId': convert_to_id})
+    print(credits_df.dtypes)
+    print(credits_df.info(memory_usage='deep'))
     credits_df.to_pickle('{}/credits.p'.format(path))
 
-    # print(credits_df.iloc[0, 0][1]['name'])
-    # print(type(credits_df.iloc[0, 0][1]))
-
     keywords_df = pd.read_csv('{}/keywords.csv'.format(path),
-                             header=0, delimiter=',',
-                             names=['tmdbId', 'keywords'],
-                             converters={'tmdbId': convert_to_int,
-                                         'keywords': convert_to_dict_list})
-    print(keywords_df)
+                              header=0, delimiter=',',
+                              names=['tmdbId', 'keywords'],
+                              converters={'tmdbId': convert_to_id,
+                                          'keywords': convert_to_dict_list})
+    print(keywords_df.dtypes)
+    print(keywords_df.info(memory_usage='deep'))
     keywords_df.to_pickle('{}/keywords.p'.format(path))
-    # print(keywords_df.iloc[0,0])
 
-    # https://stackoverflow.com/questions/43614377/pandas-read-csv-skiprows-not-working
-    # indices_to_skip = pd.np.array([19763, 29572, 35671])
-    # print(indices_to_skip)
-
-    # from Prasanna's work and https://gist.github.com/gjreda/7433f5f70299610d9b6b:
-    convert_to_datetime = lambda d: print(d) #datetime.strptime(d, '%Y-%m-%d')
     movies_metadata_df = pd.read_csv('{}/movies_metadata.csv'.format(path),
                                      header=0, delimiter=',',
-                                     # iterator=True, chunksize=100, engine='python',
-                                     # index_col=0, skiprows=indices_to_skip + 1,
-                                     # error_bad_lines=False,
                                      names=['adult',
                                             'belongs_to_collection',
                                             'budget',
@@ -137,64 +147,72 @@ def main(path: str) -> None:
                                             'video',
                                             'vote_average',
                                             'vote_count'],
-                                     # parse_dates=['release_date'], infer_datetime_format=True,
-                                     converters={'adult': convert_to_bool,
+                                     converters={'adult': convert_to_bool_object,
                                                  'belongs_to_collection': convert_to_dict,
-                                                 'budget': convert_to_int,
+                                                 'budget': convert_to_float,
                                                  'genres': convert_to_dict_list,
-                                                 'homepage': format_str,
-                                                 'tmdbId': convert_to_int,
-                                                 'imdbId': format_imdb_id,
-                                                 'original_language': format_str,
-                                                 'original_title': format_str,
-                                                 'overview': format_str,
+                                                 'homepage': cleanup_str,
+                                                 'tmdbId': convert_to_id,
+                                                 'imdbId': convert_to_imdb_id,
+                                                 'original_language': cleanup_str,
+                                                 'original_title': cleanup_str,
+                                                 'overview': cleanup_str,
                                                  'popularity': convert_to_float,
-                                                 'poster_path': format_str,
+                                                 'poster_path': cleanup_str,
                                                  'production_companies': convert_to_dict_list,
                                                  'production_countries': convert_to_dict_list,
-                                                 'release_date': convert_to_datetime,
+                                                 'release_date': convert_to_date,
                                                  'revenue': convert_to_float,
                                                  'runtime': convert_to_float,
                                                  'spoken_languages': convert_to_dict_list,
-                                                 'status': format_str,
-                                                 'tagline': format_str,
-                                                 'title': format_str,
-                                                 'video': convert_to_bool,
+                                                 'status': cleanup_str,
+                                                 'tagline': cleanup_str,
+                                                 'title': cleanup_str,
+                                                 'video': convert_to_bool_object,
                                                  'vote_average': convert_to_float,
-                                                 'vote_count': convert_to_int})
-    print(movies_metadata_df.dtypes)
-    print(movies_metadata_df.describe())
-    movies_metadata_df.to_pickle('{}/movies_metadata.p'.format(path))
+                                                 'vote_count': convert_to_float})
 
+    # cleanup malformed rows
+    null_adult_cols = movies_metadata_df.loc[movies_metadata_df['adult'].isnull()].index.values
+    movies_metadata_df = movies_metadata_df.drop(null_adult_cols)
+    movies_metadata_df['adult'] = movies_metadata_df.adult.astype(bool)
+    movies_metadata_df['video'] = movies_metadata_df.video.astype(bool)
+
+    print(movies_metadata_df.dtypes)
+    print(movies_metadata_df.info(memory_usage='deep'))
+    movies_metadata_df.to_pickle('{}/movies_metadata.p'.format(path))
 
     # Simple CSV files
 
     links_df = pd.read_csv('{}/links.csv'.format(path),
                            header=0, delimiter=',',
                            names=['movieId', 'imdbId', 'tmdbId'],
-                           converters={'movieId': convert_to_int,
-                                       'imdbId': format_imdb_id,
-                                       'tmdbId': convert_to_int})
-    print(links_df.describe())
+                           converters={'movieId': convert_to_id,
+                                       'imdbId': convert_to_imdb_id,
+                                       'tmdbId': convert_to_id})
+    print(links_df.dtypes)
+    print(links_df.info(memory_usage='deep'))
     links_df.to_pickle('{}/links.p'.format(path))
 
     links_small_df = pd.read_csv('{}/links_small.csv'.format(path),
                                  header=0, delimiter=',',
                                  names=['movieId', 'imdbId', 'tmdbId'],
-                                 converters={'movieId': convert_to_int,
-                                             'imdbId': format_imdb_id,
-                                             'tmdbId': convert_to_int})
-    print(links_small_df.describe())
+                                 converters={'movieId': convert_to_id,
+                                             'imdbId': convert_to_imdb_id,
+                                             'tmdbId': convert_to_id})
+    print(links_small_df.dtypes)
+    print(links_small_df.info(memory_usage='deep'))
     links_small_df.to_pickle('{}/links_small.p'.format(path))
 
     ratings_small_df = pd.read_csv('{}/ratings_small.csv'.format(path),
                                    header=0, delimiter=',',
                                    names=['userId', 'movieId', 'rating', 'timestamp'],
-                                   converters={'userId': convert_to_int,
-                                               'movieId': convert_to_int,
+                                   converters={'userId': convert_to_id,
+                                               'movieId': convert_to_id,
                                                'rating': convert_to_float,
-                                               'timestamp': convert_to_int})
-    print(ratings_small_df.describe())
+                                               'timestamp': convert_to_float})
+    print(ratings_small_df.dtypes)
+    print(ratings_small_df.info(memory_usage='deep'))
     ratings_small_df.to_pickle('{}/ratings_small.p'.format(path))
 
 
