@@ -6,4 +6,4 @@ Built from this directory using:
 
 Run JAR:
 
-```java -cp helloworld-1.0-SNAPSHOT-jar-with-dependencies.jar com.sci.hello.App```
+```java -cp target/helloworld-1.0-SNAPSHOT-jar-with-dependencies.jar com.sci.hello.App```
