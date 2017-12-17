@@ -1,5 +1,8 @@
 # Apache Ignite Hello World
 
+Create environment variable for IGNITE_HOME, pointing to Ignite Fabric installation path
+
+
 Built from this directory using:
 
 ```mvn clean clean install```
