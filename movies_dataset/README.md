@@ -2,6 +2,10 @@
 
 Default is running in current directory.
 
+## Python version
+
+Use Python 3 (tested with Python 3.6).
+
 ## Datasets
 
 Imports [Kaggle movies dataset](https://www.kaggle.com/rounakbanik/the-movies-dataset),
@@ -28,5 +32,7 @@ python csv_importer.py --help
 ## Loading Pickle files
 
 ```
+import pickle
+
 credits_df = pickle.load( open('credits.p', 'rb') )
 ```
