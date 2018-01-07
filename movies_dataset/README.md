@@ -31,8 +31,18 @@ python csv_importer.py --help
 
 ## Loading Pickle files
 
+Using Python:
+
 ```
 import pickle
 
 credits_df = pickle.load( open('credits.p', 'rb') )
+```
+
+Using pandas:
+
+```
+import pandas
+
+credits_df = credits_df = pandas('credits.p')
 ```
