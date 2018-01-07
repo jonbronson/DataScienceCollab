@@ -44,5 +44,5 @@ Using pandas:
 ```
 import pandas
 
-credits_df = credits_df = pandas('credits.p')
+credits_df = pandas.read_pickle('credits.p')
 ```
