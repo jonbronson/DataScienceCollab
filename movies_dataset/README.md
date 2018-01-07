@@ -9,8 +9,11 @@ converts to Pandas dataframes with cleanup and exports as pickle files.
 
 Script expects all 6 datasets (*credits.csv*, *keywords.csv*, *links.csv*, *links_small.csv*, *movies_metadata.csv*, *ratings_small.csv*).
 
+## Dependencies
 
-## Setting path to movies datasets.
+* pandas (with numpy)
+
+## Setting path to movies datasets
 
 ```
 python csv_importer.py --path /home/ayla/movies
@@ -20,4 +23,10 @@ python csv_importer.py --path /home/ayla/movies
 
 ```
 python csv_importer.py --help
+```
+
+## Loading Pickle files
+
+```
+credits_df = pickle.load( open('credits.p', 'rb') )
 ```
