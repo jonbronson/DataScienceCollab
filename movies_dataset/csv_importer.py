@@ -132,6 +132,8 @@ def main(path: str) -> None:
     cast_credits_df.to_pickle('{}/cast_credits.p'.format(path))
 
     crew_credits_df = credits_array_to_dataframe(credits_df['crew'].values, credits_df['tmdbId'].values)
+    crew_credits_df['gender'] = crew_credits_df.gender.astype(int)
+    crew_credits_df['id'] = crew_credits_df.id.astype(int)
     print(crew_credits_df.info(memory_usage='deep'))
     crew_credits_df.to_pickle('{}/crew_credits.p'.format(path))
 
