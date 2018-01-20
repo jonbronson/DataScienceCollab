@@ -99,6 +99,17 @@ def convert_to_id(id: str) -> pd.np.int32:
         return -1
 
 
+def credits_array_to_dataframe(array: pd.np.ndarray, id_array: pd.np.ndarray) -> pd.DataFrame:
+    accumulator = list()
+
+    for i in range(len(array)):
+        df = pd.DataFrame(array[i])
+        df['tmdbId'] = id_array[i]
+        accumulator.append(df)
+
+    return pd.concat(accumulator, axis=0, ignore_index=True)
+
+
 def main(path: str) -> None:
     # credits.csv, keywords.csv and movies_metadata.csv contain "stringified" JSON Objects
     # converter needed since default does not convert stringified JSON
@@ -111,6 +122,18 @@ def main(path: str) -> None:
     print(credits_df.dtypes)
     print(credits_df.info(memory_usage='deep'))
     credits_df.to_pickle('{}/credits.p'.format(path))
+
+    cast_credits_df = credits_array_to_dataframe(credits_df['cast'].values, credits_df['tmdbId'].values)
+    cast_credits_df['cast_id'] = cast_credits_df.cast_id.astype(int)
+    cast_credits_df['gender'] = cast_credits_df.gender.astype(int)
+    cast_credits_df['id'] = cast_credits_df.id.astype(int)
+    cast_credits_df['order'] = cast_credits_df.order.astype(int)
+    print(cast_credits_df.info(memory_usage='deep'))
+    cast_credits_df.to_pickle('{}/cast_credits.p'.format(path))
+
+    crew_credits_df = credits_array_to_dataframe(credits_df['crew'].values, credits_df['tmdbId'].values)
+    print(crew_credits_df.info(memory_usage='deep'))
+    crew_credits_df.to_pickle('{}/crew_credits.p'.format(path))
 
     keywords_df = pd.read_csv('{}/keywords.csv'.format(path),
                               header=0, delimiter=',',
@@ -203,6 +226,7 @@ def main(path: str) -> None:
     print(links_small_df.dtypes)
     print(links_small_df.info(memory_usage='deep'))
     links_small_df.to_pickle('{}/links_small.p'.format(path))
+    # links_small_df.to_csv('{}/links_small_clean.csv'.format(path))
 
     ratings_small_df = pd.read_csv('{}/ratings_small.csv'.format(path),
                                    header=0, delimiter=',',
@@ -221,5 +245,4 @@ if '__main__' == __name__:
                                                  'Load files from and output picked dataframes to PATH. Default is "."')
     parser.add_argument('--path', default='.', required=False)
     args = parser.parse_args()
-    # print(args)
     main(args.path)
