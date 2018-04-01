@@ -9,12 +9,8 @@ sc = SparkContext("local", "Simple App")
 spark = SparkSession(sc)
 
 spark_df = spark.read.parquet('chocolate_ratings_augmented.parquet')
-df_full = spark_df.toPandas();
-# df_full = pd.read_parquet('/Users/jon/workspace/DataScienceCollab/chocolate/chocolate_ratings_augmented.parquet', engine='pyarrow')
-# df = df_full.drop(['REF', 'ReviewDate', 'BroadBeanOrigin_indexed', 'Company_indexed', 'SpecificBeanOriginOrBarName_indexed', 'CompanyLocation_indexed', 'BeanType_indexed'], axis=1)
-#print(df.head())
-df = df_full;
-print(df.shape)
+df = spark_df.toPandas();
+
 
 # https://www.tensorflow.org/versions/r1.2/tutorials/wide_and_deep
 COLUMNS = ['Company', 'SpecificBeanOriginOrBarName', 'CocoaPercent', 'CompanyLocation', 'Rating', 'BeanType', 'BroadBeanOrigin']
