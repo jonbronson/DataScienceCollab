@@ -20,11 +20,7 @@ df = df.withColumnRenamed('_c3', 'query')
 df = df.withColumnRenamed('_c4', 'user')
 df = df.withColumnRenamed('_c5', 'text')
 df = df.select(["tweetId", "date", "user", "text", "polarity", "query"])
-
-
 df = df.withColumn('date', UserDefinedFunction(lambda date: int(parsedate_to_datetime(date).timestamp()), IntegerType())('date'))
-
-
 
 df.write.parquet("twitter_training.parquet")
 
